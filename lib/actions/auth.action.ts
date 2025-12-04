@@ -114,3 +114,33 @@ export async function isAuthenticated() {
 
     return !!user; // the double ! converts to boolean and tells if user exists or not. E.g. if user is null it returns false but one ! would return true and then another ! would convert it to false. Similarly, if user exists it returns true but one ! would convert it to false and another ! would convert it back to true.
 }
+
+export async function getInterviewsByUserId(userId: string): Promise<Interview[] | null> {
+    const interviews = await db
+        .collection('interviews')
+        .where('userId', '==', userId)
+        .orderBy('createdAt', 'desc')
+        .get();
+    
+    return interviews.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+    })) as Interview[];
+}
+
+export async function getLatestInterviews(params: GetLatestInterviewsParams): Promise<Interview[] | null> {
+    const { userId, limit = 20 } = params;
+
+    const interviews = await db
+        .collection('interviews')
+        .orderBy('createdAt', 'desc')
+        .where('finalized', '==', true)
+        .where('userId', '!=', userId)
+        .limit(limit)
+        .get();
+    
+    return interviews.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+    })) as Interview[];
+}
