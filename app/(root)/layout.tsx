@@ -1,23 +1,21 @@
-import { isAuthenticated } from "@/lib/actions/auth.action";
-import Image from "next/image";
-import Link from "next/link";
+import { getCurrentUser, isAuthenticated } from "@/lib/actions/auth.action";
+import { getInterviewsByUserId } from "@/lib/actions/general.action";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
+import DashboardShell from "@/components/DashboardShell";
 
 const RootLayout = async ({ children }: { children: ReactNode }) => {
   const isUserAuthenticated = await isAuthenticated();
 
   if (!isUserAuthenticated) redirect("/sign-in");
 
-  return (
-    <div className="root-layout">
-      <Link href={"/"} className="flex items-center gap-2">
-        <Image src={"/logo.svg"} alt="Logo" width={38} height={32} />
-        <h2 className="text-primary-100">IntervU Slayer</h2>
-      </Link>
+  const user = await getCurrentUser();
+  const userInterviews = await getInterviewsByUserId(user?.id!);
 
+  return (
+    <DashboardShell user={user} recentInterviews={userInterviews ?? []}>
       {children}
-    </div>
+    </DashboardShell>
   );
 };
 

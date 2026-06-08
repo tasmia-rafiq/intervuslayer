@@ -4,9 +4,24 @@ import { interviewer } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
 import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
-import Image from "next/image";
+import {
+  Activity,
+  ArrowRight,
+  Bot,
+  CheckCircle2,
+  Clock3,
+  Loader2,
+  Mic,
+  MicOff,
+  Phone,
+  PhoneOff,
+  Radio,
+  Sparkles,
+  UserRound,
+  Volume2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -45,7 +60,6 @@ const Agent = ({
 
     const onSpeechStart = () => setIsSpeaking(true);
     const onSpeechEnd = () => setIsSpeaking(false);
-
     const onError = (error: Error) => console.log("Error: ", error);
 
     vapi.on("call-start", onCallStart);
@@ -66,26 +80,24 @@ const Agent = ({
   }, []);
 
   const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-    console.log("Generate feedback here.");
-
     const { success, feedbackId: id } = await createFeedback({
       interviewId: interviewId!,
       userId: userId!,
       transcript: messages,
-    })
+    });
 
     if (success && id) {
       router.push(`/interview/${interviewId}/feedback`);
     } else {
       console.log("Error saving feedback.");
-      router.push("/");
+      router.push("/dashboard");
     }
   };
 
   useEffect(() => {
     if (callStatus === CallStatus.FINISHED) {
       if (type === "generate") {
-        router.push("/");
+        router.push("/dashboard");
       } else {
         handleGenerateFeedback(messages);
       }
@@ -100,104 +112,322 @@ const Agent = ({
         undefined,
         undefined,
         undefined,
-        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-        variableValues: {
-          username: userName,
-          userid: userId,
-        },
-      });
+        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,
+        {
+          variableValues: {
+            username: userName,
+            userid: userId,
+          },
+        }
+      );
     } else {
-      let formattedQuestions = '';
+      let formattedQuestions = "";
 
       if (questions) {
-        formattedQuestions = questions.map((question) => `- ${question}`).join('\n');
+        formattedQuestions = questions
+          .map((question) => `- ${question}`)
+          .join("\n");
       }
 
       await vapi.start(interviewer, {
         variableValues: {
           questions: formattedQuestions,
-        }
-      })
+        },
+      });
     }
   };
+
   const handleDisconnect = async () => {
     setCallStatus(CallStatus.FINISHED);
-
     vapi.stop();
   };
 
   const latestMessage = messages[messages.length - 1]?.content;
+
   const isCallInactiveOrFinished =
     callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
 
+  const statusLabel = useMemo(() => {
+    if (callStatus === CallStatus.CONNECTING) return "Connecting";
+    if (callStatus === CallStatus.ACTIVE) return "Live";
+    if (callStatus === CallStatus.FINISHED) return "Finished";
+    return "Ready";
+  }, [callStatus]);
+
   return (
-    <>
-      <div className="call-view">
-        <div className="card-interviewer">
-          <div className="avatar">
-            <Image
-              src={"/ai-avatar.png"}
-              alt="vapi"
-              width={65}
-              height={54}
-              className="object-cover"
-            />
-            {isSpeaking && <span className="animate-speak"></span>}
+    <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
+      <section className="overflow-hidden rounded-2xl border border-white/6 bg-(--color-surface-1)">
+        <div className="flex items-center justify-between border-b border-white/6 px-4 py-3">
+          <div>
+            <p className="text-xs text-[#859599]">Session room</p>
+            <h2 className="mt-0.5 text-sm font-medium text-[#F4F1EA]">
+              {type === "generate"
+                ? "Generate a new interview"
+                : "Live mock interview"}
+            </h2>
           </div>
 
-          <h3>AI Interviewer</h3>
-        </div>
-
-        <div className="card-border">
-          <div className="card-content">
-            <Image
-              src={"/user-avatar.png"}
-              alt="user avatar"
-              width={540}
-              height={540}
-              className="rounded-full object-cover size-[120px]"
-            />
-            <h3>{userName}</h3>
-          </div>
-        </div>
-      </div>
-
-      {messages.length > 0 && (
-        <div className="transcript-border">
-          <div className="transcript">
-            <p
-              key={latestMessage}
-              className={cn(
-                "transition-opacity duration-500 opacity-0",
-                "animate-fadeIn opacity-100"
-              )}
-            >
-              {latestMessage}
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="w-full flex justify-center">
-        {callStatus != "ACTIVE" ? (
-          <button className="relative btn-call" onClick={handleCall}>
+          <div
+            className={cn(
+              "flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs",
+              callStatus === CallStatus.ACTIVE
+                ? "border-[#2DD4BF]/20 bg-[#2DD4BF]/10 text-[#A7F3D0]"
+                : "border-white/6 bg-white/2.5 text-[#859599]"
+            )}
+          >
             <span
               className={cn(
-                "absolute animate-ping rounded-full opacity-75",
-                callStatus != "CONNECTING" && "hidden"
+                "size-1.5 rounded-full",
+                callStatus === CallStatus.ACTIVE
+                  ? "bg-[#2DD4BF]"
+                  : "bg-[#69756F]"
               )}
             />
+            {statusLabel}
+          </div>
+        </div>
 
-            <span>{isCallInactiveOrFinished ? "Call" : ". . . "}</span>
-          </button>
-        ) : (
-          <button className="btn-disconnect" onClick={handleDisconnect}>
-            End
-          </button>
-        )}
-      </div>
-    </>
+        <div className="grid min-h-[520px] gap-4 p-4 lg:grid-cols-2">
+          <ParticipantCard
+            label="AI Interviewer"
+            description={
+              type === "generate"
+                ? "Will ask for your role, level, tech stack, and interview preferences."
+                : "Will guide the interview and ask follow-up questions."
+            }
+            icon={<Bot size={26} />}
+            active={isSpeaking}
+            state={isSpeaking ? "Speaking" : "Listening"}
+          />
+
+          <ParticipantCard
+            label={userName || "Candidate"}
+            description="Answer naturally. The session will use your responses to create a structured interview flow."
+            icon={<UserRound size={26} />}
+            active={callStatus === CallStatus.ACTIVE && !isSpeaking}
+            state={callStatus === CallStatus.ACTIVE ? "Connected" : "Waiting"}
+          />
+        </div>
+
+        <div className="border-t border-white/6 px-4 py-4">
+          {messages.length > 0 ? (
+            <div className="rounded-xl border border-white/6 bg-[#050607] p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs text-[#859599]">
+                  Latest transcript
+                </span>
+                <span className="text-xs text-[#69756F]">
+                  {messages.length} messages
+                </span>
+              </div>
+
+              <p
+                key={latestMessage}
+                className="animate-fadeIn text-sm leading-6 text-[#A8B3AD]"
+              >
+                {latestMessage}
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-white/8 bg-white/1.5 p-4 text-sm leading-6 text-[#859599]">
+              Transcript will appear here once the conversation starts.
+            </div>
+          )}
+
+          <div className="mt-4 flex justify-center">
+            {callStatus !== CallStatus.ACTIVE ? (
+              <button
+                className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#2DD4BF] px-4 text-sm font-medium text-[#03110F] transition hover:bg-[#5EEAD4] disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={handleCall}
+                disabled={callStatus === CallStatus.CONNECTING}
+              >
+                {callStatus === CallStatus.CONNECTING ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Connecting
+                  </>
+                ) : (
+                  <>
+                    <Phone size={16} />
+                    {isCallInactiveOrFinished ? "Start call" : "Starting"}
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/8 bg-white/[0.035] px-4 text-sm font-medium text-[#F4F1EA] transition hover:bg-white/6"
+                onClick={handleDisconnect}
+              >
+                <PhoneOff size={16} />
+                End session
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <aside className="space-y-5">
+        <SidePanel title="Session checklist" icon={<CheckCircle2 size={15} />}>
+          <ChecklistItem done label="Microphone access allowed" />
+          <ChecklistItem done={callStatus !== CallStatus.INACTIVE} label="Session initialized" />
+          <ChecklistItem done={messages.length > 0} label="Transcript captured" />
+        </SidePanel>
+
+        <SidePanel title="How to answer" icon={<Sparkles size={15} />}>
+          <div className="space-y-3 text-sm text-[#A8B3AD]">
+            <Tip number="1" text="State the concept clearly first." />
+            <Tip number="2" text="Use one concrete project example." />
+            <Tip number="3" text="Mention tradeoffs, not only definitions." />
+            <Tip number="4" text="Keep each answer structured and concise." />
+          </div>
+        </SidePanel>
+
+        <SidePanel title="Session details" icon={<Activity size={15} />}>
+          <div className="space-y-3 text-sm">
+            <DetailRow label="Mode" value={type === "generate" ? "Generation" : "Interview"} />
+            <DetailRow label="Status" value={statusLabel} />
+            <DetailRow label="Messages" value={String(messages.length)} />
+          </div>
+        </SidePanel>
+      </aside>
+    </div>
   );
 };
 
 export default Agent;
+
+function ParticipantCard({
+  label,
+  description,
+  icon,
+  active,
+  state,
+}: {
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  active: boolean;
+  state: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative flex min-h-[430px] flex-col justify-between rounded-2xl border p-5 transition",
+        active
+          ? "border-[#2DD4BF]/25 bg-[#2DD4BF]/4.5"
+          : "border-white/6 bg-[#050607]"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-[#859599]">{state}</span>
+
+        {active ? (
+          <span className="flex items-center gap-1.5 text-xs text-[#A7F3D0]">
+            <Radio size={13} />
+            Active
+          </span>
+        ) : (
+          <span className="text-xs text-[#69756F]">Idle</span>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <div
+          className={cn(
+            "relative flex size-24 items-center justify-center rounded-2xl border",
+            active
+              ? "border-[#2DD4BF]/25 bg-[#2DD4BF]/10 text-[#A7F3D0]"
+              : "border-white/8 bg-white/2.5 text-[#A8B3AD]"
+          )}
+        >
+          {icon}
+
+          {active && (
+            <span className="absolute inset-0 rounded-2xl border border-[#2DD4BF]/30 animate-ping" />
+          )}
+        </div>
+
+        <h3 className="mt-5 text-lg font-semibold">{label}</h3>
+        <p className="mt-2 max-w-sm text-sm leading-6 text-[#859599]">
+          {description}
+        </p>
+
+        {active && (
+          <div className="mt-6 flex h-8 items-end gap-1">
+            {[24, 40, 28, 52, 36, 64, 32, 48, 26].map((height, index) => (
+              <span
+                key={index}
+                style={{ height }}
+                className="w-1 rounded-full bg-[#2DD4BF]/70"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between border-t border-white/6 pt-4">
+        <span className="flex items-center gap-2 text-xs text-[#69756F]">
+          {active ? <Mic size={14} /> : <MicOff size={14} />}
+          {active ? "Audio active" : "Audio standby"}
+        </span>
+
+        <Volume2 size={14} className="text-[#69756F]" />
+      </div>
+    </div>
+  );
+}
+
+function SidePanel({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-white/6 bg-(--color-surface-1)">
+      <div className="flex items-center gap-2 border-b border-white/6 px-4 py-3">
+        <span className="text-[#859599]">{icon}</span>
+        <h3 className="text-sm font-medium">{title}</h3>
+      </div>
+
+      <div className="p-4">{children}</div>
+    </section>
+  );
+}
+
+function ChecklistItem({ done, label }: { done: boolean; label: string }) {
+  return (
+    <div className="flex items-center justify-between border-b border-white/6 py-2 last:border-b-0">
+      <span className="text-sm text-[#A8B3AD]">{label}</span>
+      <span
+        className={cn(
+          "size-2 rounded-full",
+          done ? "bg-[#2DD4BF]" : "bg-[#3A4240]"
+        )}
+      />
+    </div>
+  );
+}
+
+function Tip({ number, text }: { number: string; text: string }) {
+  return (
+    <div className="flex gap-3">
+      <span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-white/6 bg-white/2.5 text-xs text-[#A7F3D0]">
+        {number}
+      </span>
+      <span className="leading-6">{text}</span>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between border-b border-white/6 pb-2 last:border-b-0 last:pb-0">
+      <span className="text-[#859599]">{label}</span>
+      <span className="font-medium text-[#F4F1EA]">{value}</span>
+    </div>
+  );
+}

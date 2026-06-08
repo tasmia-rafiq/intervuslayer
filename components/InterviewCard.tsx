@@ -1,57 +1,94 @@
-import { getRandomInterviewCover } from '@/lib/utils';
-import dayjs from 'dayjs'
-import Image from 'next/image';
-import { Button } from './ui/button';
-import Link from 'next/link';
-import DisplayTechIcons from './DisplayTechIcons';
-import { getFeedbackByInterviewId } from '@/lib/actions/general.action';
+import dayjs from "dayjs";
+import Link from "next/link";
+import {
+  ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  Circle,
+  FileText,
+} from "lucide-react";
 
-const InterviewCard = async ({ id, userId, role, type, techstack, createdAt }: InterviewCardProps) => {
-  const feedback = userId && id ? await getFeedbackByInterviewId({ interviewId: id, userId }) : null;
+import DisplayTechIcons from "@/components/DisplayTechIcons";
+import { getFeedbackByInterviewId } from "@/lib/actions/general.action";
+
+const InterviewCard = async ({
+  id,
+  userId,
+  role,
+  type,
+  techstack,
+  createdAt,
+}: InterviewCardProps) => {
+  const feedback =
+    userId && id
+      ? await getFeedbackByInterviewId({ interviewId: id, userId })
+      : null;
+
   const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
-  const formatedDate = dayjs(feedback?.createdAt || createdAt || Date.now()).format('MMM D, YYYY');
+  const formattedDate = dayjs(
+    feedback?.createdAt || createdAt || Date.now(),
+  ).format("MMM D");
+
+  const href = feedback ? `/interview/${id}/feedback` : `/interview/${id}`;
 
   return (
-    <div className='card-border w-[360px] max-sm:w-full min-h-96'>
-      <div className='card-interview'>
-        <div>
-          <div className='absolute top-0 right-0 w-fit px-4 py-2 rounded-bl-lg bg-light-600'>
-            <p className='badge-text'>{normalizedType}</p>
+    <Link
+      href={href}
+      className="group block rounded-2xl border border-white/6 bg-(--color-surface-1) transition hover:border-white/10 hover:bg-(--color-surface-2)"
+    >
+      <article className="flex items-center justify-between gap-4 p-4">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/2.5">
+            {feedback ? (
+              <CheckCircle2 size={15} className="text-[#2DD4BF]" />
+            ) : (
+              <Circle size={15} className="text-[#69756F]" />
+            )}
           </div>
 
-          <Image src={getRandomInterviewCover()} alt='cover img' width={90} height={90} className='rounded-full object-fit size-[90px]' />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="truncate text-sm font-medium capitalize text-[#F4F1EA]">
+                {role} Interview
+              </h3>
 
-          <h3 className='mt-5 capitalize'>{role} Interview</h3>
-
-          <div className='flex flex-row gap-5 mt-3'>
-            <div className='flex flex-row gap-2'>
-              <Image src={"/calendar.svg"} alt='calendar' width={22} height={22} />
-              <p>{formatedDate}</p>
+              <span className="rounded-md border border-white/6 bg-white/2.5 px-2 py-0.5 text-[11px] capitalize text-[#859599]">
+                {normalizedType}
+              </span>
             </div>
 
-            <div className='flex flex-row gap-2 items-center'>
-              <Image src={"/star.svg"} alt='star' width={22} height={22} />
-              <p>{feedback?.totalScore || '---'}/100</p>
+            <p className="mt-1 line-clamp-1 text-sm text-[#859599]">
+              {feedback?.finalAssessment ||
+                "Start this practice session to generate a structured feedback report."}
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-(--color-accent)">
+              <span className="flex items-center gap-1.5">
+                <CalendarDays size={13} />
+                {formattedDate}
+              </span>
+
+              <span className="flex items-center gap-1.5">
+                <FileText size={13} />
+                {feedback ? `${feedback.totalScore}/100` : "Not taken"}
+              </span>
+
+              <p className="text-xs text-(--color-accent)">
+                {techstack
+                  .join(" • ")
+                  .replace(/\s*•\s*/g, " • ")}
+              </p>
             </div>
           </div>
-
-          <p className='line-clamp-2 mt-5'>{feedback?.finalAssessment || "You haven't taken the interview yet. Take it now to improve your skills."}</p>
         </div>
 
-        <div className='flex flex-row justify-between'>
-          <DisplayTechIcons techStack={techstack} />
-          <Button className='btn-primary'>
-            <Link href={feedback
-              ? `/interview/${id}/feedback`
-              : `/interview/${id}`
-            }>
-              {feedback ? 'Check Feedback' : 'View Interview'}
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
+        <span className="flex h-8 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-medium text-(--color-accent) opacity-80 transition group-hover:bg-(--color-accent)/10 group-hover:opacity-100">
+          {feedback ? "Open" : "Start"}
+          <ArrowRight size={14} />
+        </span>
+      </article>
+    </Link>
+  );
+};
 
-export default InterviewCard
+export default InterviewCard;
