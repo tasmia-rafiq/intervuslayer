@@ -1,10 +1,18 @@
+import Groq from "groq-sdk";
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
 import { getRandomInterviewCover } from "@/lib/utils";
 import { db } from "@/firebase/admin";
 
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
 export async function GET() {
-  return Response.json({ success: true, data: "Vapi generate route is working" });
+  return Response.json({
+    success: true,
+    data: "Vapi generate route is working",
+  });
 }
 
 function extractJsonArray(text: string) {
@@ -14,7 +22,7 @@ function extractJsonArray(text: string) {
     const match = text.match(/\[[\s\S]*\]/);
 
     if (!match) {
-      throw new Error(`Gemini did not return a JSON array. Output: ${text}`);
+      throw new Error(`Model did not return a JSON array. Output: ${text}`);
     }
 
     return JSON.parse(match[0]);
@@ -25,7 +33,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    console.log("VAPI GENERATE BODY:", JSON.stringify(body, null, 2));
+    console.log("GROQ GENERATE BODY:", JSON.stringify(body, null, 2));
 
     const type = body.type;
     const role = body.role;
@@ -41,7 +49,7 @@ export async function POST(request: Request) {
           message: "Missing required fields",
           received: body,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -52,42 +60,71 @@ export async function POST(request: Request) {
           .map((item) => item.trim())
           .filter(Boolean);
 
-    const { text } = await generateText({
-      model: google("gemini-2.0-flash-001"),
-      prompt: `
-Prepare job interview questions.
+    //     const { text } = await generateText({
+    //       model: google("gemini-2.0-flash-001"),
+    //       prompt: `
+    // Prepare job interview questions.
 
-Return ONLY a valid JSON array of strings.
-Do not use markdown.
-Do not use code fences.
-Do not add explanation before or after the array.
+    // Return ONLY a valid JSON array of strings.
+    // Do not use markdown.
+    // Do not use code fences.
+    // Do not add explanation before or after the array.
 
-Interview details:
-Role: ${role}
-Experience level: ${level}
-Tech stack: ${techstackArray.join(", ")}
-Question type focus: ${type}
-Number of questions: ${amount}
+    // Interview details:
+    // Role: ${role}
+    // Experience level: ${level}
+    // Tech stack: ${techstackArray.join(", ")}
+    // Question type focus: ${type}
+    // Number of questions: ${amount}
 
-Example output:
-["Question 1", "Question 2", "Question 3"]
-      `,
+    // Example output:
+    // ["Question 1", "Question 2", "Question 3"]
+    //       `,
+    //     });
+
+    //     console.log("GEMINI RAW QUESTIONS:", text);
+
+    //     const parsedQuestions = extractJsonArray(text);
+
+    //     if (!Array.isArray(parsedQuestions)) {
+    //       throw new Error("Generated questions are not an array.");
+    //     }
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.4,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You prepare job interview questions. Return only valid JSON. No markdown. No explanation.",
+        },
+        {
+          role: "user",
+          content: `
+            Create ${amount} interview questions.
+
+            Role: ${role}
+            Experience Level: ${level}
+            Tech stack: ${techstackArray.join(", ")}
+            Question type focus: ${type}
+
+            Return ONLY this format:
+            ["Question 1", "Question 2", "Question 3"]
+          `,
+        },
+      ],
     });
 
-    console.log("GEMINI RAW QUESTIONS:", text);
-
-    const parsedQuestions = extractJsonArray(text);
-
-    if (!Array.isArray(parsedQuestions)) {
-      throw new Error("Generated questions are not an array.");
-    }
+    const raw = completion.choices[0]?.message?.content ?? "";
+    const questions = extractJsonArray(raw);
 
     const interview = {
       role,
       type,
       level,
       techstack: techstackArray,
-      questions: parsedQuestions,
+      questions,
       userId: userid,
       finalized: true,
       coverImage: getRandomInterviewCover(),
@@ -103,17 +140,18 @@ Example output:
         success: true,
         interviewId: docRef.id,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
-    console.error("VAPI GENERATE ERROR:", error);
+    console.error("GROQ GENERATE ERROR:", error);
 
     return Response.json(
       {
         success: false,
+        message: "Interview generation failed.",
         error: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
