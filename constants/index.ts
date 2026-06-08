@@ -103,13 +103,14 @@ export const interviewer: CreateAssistantDTO = {
     "Hello! Thank you for taking the time to speak with me today. I'm excited to learn more about you and your experience.",
   transcriber: {
     provider: "deepgram",
-    model: "nova-2",
+    model: "flux-general-multi",
     language: "en",
   },
   voice: {
     provider: "11labs",
     voiceId: "sarah",
-    stability: 0.4,
+    model: "eleven_multilingual_v2",
+    stability: 0.7,
     similarityBoost: 0.8,
     speed: 0.9,
     style: 0.5,
@@ -117,7 +118,7 @@ export const interviewer: CreateAssistantDTO = {
   },
   model: {
     provider: "openai",
-    model: "gpt-4",
+    model: "gpt-5.1",
     messages: [
       {
         role: "system",
