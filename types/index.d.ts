@@ -44,6 +44,7 @@ interface InterviewCardProps {
   role: string;
   type: string;
   techstack: string[];
+  level: string;
   createdAt?: string;
 }
 

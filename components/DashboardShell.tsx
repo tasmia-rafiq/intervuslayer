@@ -51,7 +51,7 @@ export default function DashboardShell({
           </Link>
 
           <Link
-            href="/interview"
+            href="/interview/new"
             title="Create new interview"
             className="flex size-8 items-center justify-center rounded-sm text-[#b0b7bb] transition hover:bg-white/5.5 hover:text-[#F4F1EA]"
           >
@@ -79,7 +79,7 @@ export default function DashboardShell({
                 {hasMoreRecent && (
                   <Link
                     href="/dashboard#history"
-                    className="mt-1 flex h-8 items-center gap-3 rounded-sm px-3 text-sm text-[#859599] transition hover:bg-white/4.5 hover:text-[#F4F1EA]"
+                    className="mt-1 flex h-8 items-center gap-3 rounded-sm px-3 text-sm text-[#b6bcbe] transition hover:bg-white/4.5 hover:text-[#F4F1EA]"
                   >
                     <MoreHorizontal size={15} />
                     More
@@ -87,7 +87,7 @@ export default function DashboardShell({
                 )}
               </>
             ) : (
-              <div className="rounded-sm px-3 py-2 text-sm leading-5 text-[#69756F]">
+              <div className="rounded-sm px-3 py-2 text-sm leading-5 text-[#7d878a]">
                 No recent interviews yet.
               </div>
             )}
@@ -140,7 +140,7 @@ function RecentInterviewItem({
   return (
     <Link
       href={`/interview/${interview.id}`}
-      className="group flex h-8 min-w-0 items-center gap-3 rounded-sm px-3 text-sm text-[#859599] transition hover:bg-white/4.5 hover:text-[#F4F1EA]"
+      className="group flex h-8 min-w-0 items-center gap-3 rounded-sm px-3 text-sm text-[#b6bcbe] transition hover:bg-white/4.5 hover:text-[#F4F1EA]"
     >
       <History size={14} className="shrink-0" />
 

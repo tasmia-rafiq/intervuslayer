@@ -6,10 +6,9 @@ import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
 import {
   Activity,
-  ArrowRight,
   Bot,
   CheckCircle2,
-  Clock3,
+  Circle,
   Loader2,
   Mic,
   MicOff,
@@ -89,7 +88,6 @@ const Agent = ({
     if (success && id) {
       router.push(`/interview/${interviewId}/feedback`);
     } else {
-      console.log("Error saving feedback.");
       router.push("/dashboard");
     }
   };
@@ -143,6 +141,7 @@ const Agent = ({
   };
 
   const latestMessage = messages[messages.length - 1]?.content;
+  const messageCount = messages.length;
 
   const isCallInactiveOrFinished =
     callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
@@ -155,110 +154,86 @@ const Agent = ({
   }, [callStatus]);
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
+    <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
       <section className="overflow-hidden rounded-2xl border border-white/6 bg-(--color-surface-1)">
         <div className="flex items-center justify-between border-b border-white/6 px-4 py-3">
           <div>
-            <p className="text-xs text-[#859599]">Session room</p>
+            <p className="text-xs text-[#859599]">
+              {type === "generate" ? "Voice setup" : "Interview room"}
+            </p>
             <h2 className="mt-0.5 text-sm font-medium text-[#F4F1EA]">
               {type === "generate"
-                ? "Generate a new interview"
+                ? "Answer a few setup questions"
                 : "Live mock interview"}
             </h2>
           </div>
 
-          <div
-            className={cn(
-              "flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs",
-              callStatus === CallStatus.ACTIVE
-                ? "border-[#2DD4BF]/20 bg-[#2DD4BF]/10 text-[#A7F3D0]"
-                : "border-white/6 bg-white/2.5 text-[#859599]"
-            )}
-          >
-            <span
-              className={cn(
-                "size-1.5 rounded-full",
-                callStatus === CallStatus.ACTIVE
-                  ? "bg-[#2DD4BF]"
-                  : "bg-[#69756F]"
-              )}
-            />
-            {statusLabel}
-          </div>
+          <StatusPill status={callStatus} label={statusLabel} />
         </div>
 
-        <div className="grid min-h-[520px] gap-4 p-4 lg:grid-cols-2">
+        <div className="grid min-h-[430px] gap-3 p-3 lg:grid-cols-2">
           <ParticipantCard
-            label="AI Interviewer"
+            label="Assistant"
             description={
               type === "generate"
-                ? "Will ask for your role, level, tech stack, and interview preferences."
-                : "Will guide the interview and ask follow-up questions."
+                ? "Asks for the role, level, stack, type, and question count."
+                : "Guides the mock interview and asks follow-up questions."
             }
-            icon={<Bot size={26} />}
+            icon={<Bot size={22} />}
             active={isSpeaking}
-            state={isSpeaking ? "Speaking" : "Listening"}
+            state={isSpeaking ? "Speaking" : "Ready"}
           />
 
           <ParticipantCard
             label={userName || "Candidate"}
-            description="Answer naturally. The session will use your responses to create a structured interview flow."
-            icon={<UserRound size={26} />}
+            description={
+              type === "generate"
+                ? "Respond naturally. Your answers are used to create the interview."
+                : "Answer clearly and use examples from your experience."
+            }
+            icon={<UserRound size={22} />}
             active={callStatus === CallStatus.ACTIVE && !isSpeaking}
             state={callStatus === CallStatus.ACTIVE ? "Connected" : "Waiting"}
           />
         </div>
 
-        <div className="border-t border-white/6 px-4 py-4">
-          {messages.length > 0 ? (
-            <div className="rounded-xl border border-white/6 bg-[#050607] p-4">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs text-[#859599]">
-                  Latest transcript
-                </span>
-                <span className="text-xs text-[#69756F]">
-                  {messages.length} messages
-                </span>
-              </div>
+        <div className="border-t border-white/6 p-4">
+          <TranscriptBox
+            latestMessage={latestMessage}
+            messageCount={messageCount}
+          />
 
-              <p
-                key={latestMessage}
-                className="animate-fadeIn text-sm leading-6 text-[#A8B3AD]"
-              >
-                {latestMessage}
-              </p>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-white/8 bg-white/1.5 p-4 text-sm leading-6 text-[#859599]">
-              Transcript will appear here once the conversation starts.
-            </div>
-          )}
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <p className="hidden text-xs text-[#69756F] sm:block">
+              {type === "generate"
+                ? "When the setup finishes, the interview will appear in your queue."
+                : "Ending the session will generate feedback."}
+            </p>
 
-          <div className="mt-4 flex justify-center">
             {callStatus !== CallStatus.ACTIVE ? (
               <button
-                className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#2DD4BF] px-4 text-sm font-medium text-[#03110F] transition hover:bg-[#5EEAD4] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-9 items-center gap-2 rounded-lg bg-(--color-accent) px-3 text-sm font-medium text-[#03110F] transition hover:bg-[#5EEAD4] disabled:cursor-not-allowed disabled:opacity-60"
                 onClick={handleCall}
                 disabled={callStatus === CallStatus.CONNECTING}
               >
                 {callStatus === CallStatus.CONNECTING ? (
                   <>
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 size={15} className="animate-spin" />
                     Connecting
                   </>
                 ) : (
                   <>
-                    <Phone size={16} />
-                    {isCallInactiveOrFinished ? "Start call" : "Starting"}
+                    <Phone size={15} />
+                    {type === "generate" ? "Start voice setup" : "Start interview"}
                   </>
                 )}
               </button>
             ) : (
               <button
-                className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/8 bg-white/[0.035] px-4 text-sm font-medium text-[#F4F1EA] transition hover:bg-white/6"
+                className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/8 bg-white/[0.035] px-3 text-sm font-medium text-[#F4F1EA] transition hover:bg-white/6"
                 onClick={handleDisconnect}
               >
-                <PhoneOff size={16} />
+                <PhoneOff size={15} />
                 End session
               </button>
             )}
@@ -267,24 +242,30 @@ const Agent = ({
       </section>
 
       <aside className="space-y-5">
-        <SidePanel title="Session checklist" icon={<CheckCircle2 size={15} />}>
-          <ChecklistItem done label="Microphone access allowed" />
-          <ChecklistItem done={callStatus !== CallStatus.INACTIVE} label="Session initialized" />
-          <ChecklistItem done={messages.length > 0} label="Transcript captured" />
+        <SidePanel title="Setup checklist" icon={<CheckCircle2 size={15} />}>
+          <ChecklistItem done label="Microphone ready" />
+          <ChecklistItem
+            done={callStatus !== CallStatus.INACTIVE}
+            label="Session started"
+          />
+          <ChecklistItem done={messages.length > 0} label="Answers captured" />
         </SidePanel>
 
-        <SidePanel title="How to answer" icon={<Sparkles size={15} />}>
+        <SidePanel title="What to prepare" icon={<Sparkles size={15} />}>
           <div className="space-y-3 text-sm text-[#A8B3AD]">
-            <Tip number="1" text="State the concept clearly first." />
-            <Tip number="2" text="Use one concrete project example." />
-            <Tip number="3" text="Mention tradeoffs, not only definitions." />
-            <Tip number="4" text="Keep each answer structured and concise." />
+            <Tip number="1" text="Target role, like Frontend Engineer." />
+            <Tip number="2" text="Experience level, like junior or senior." />
+            <Tip number="3" text="Tech stack, like React, Node, Firebase." />
+            <Tip number="4" text="Question focus: technical, behavioral, or mixed." />
           </div>
         </SidePanel>
 
         <SidePanel title="Session details" icon={<Activity size={15} />}>
           <div className="space-y-3 text-sm">
-            <DetailRow label="Mode" value={type === "generate" ? "Generation" : "Interview"} />
+            <DetailRow
+              label="Mode"
+              value={type === "generate" ? "Generation" : "Interview"}
+            />
             <DetailRow label="Status" value={statusLabel} />
             <DetailRow label="Messages" value={String(messages.length)} />
           </div>
@@ -295,6 +276,42 @@ const Agent = ({
 };
 
 export default Agent;
+
+function StatusPill({
+  status,
+  label,
+}: {
+  status: CallStatus;
+  label: string;
+}) {
+  const isLive = status === CallStatus.ACTIVE;
+  const isConnecting = status === CallStatus.CONNECTING;
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs",
+        isLive
+          ? "border-(--color-accent)/20 bg-(--color-accent)/10 text-[#A7F3D0]"
+          : isConnecting
+            ? "border-white/8 bg-white/4 text-[#F4F1EA]"
+            : "border-white/6 bg-white/2.5 text-[#859599]"
+      )}
+    >
+      <span
+        className={cn(
+          "size-1.5 rounded-full",
+          isLive
+            ? "bg-(--color-accent)"
+            : isConnecting
+              ? "bg-[#F4F1EA]"
+              : "bg-[#69756F]"
+        )}
+      />
+      {label}
+    </div>
+  );
+}
 
 function ParticipantCard({
   label,
@@ -312,9 +329,9 @@ function ParticipantCard({
   return (
     <div
       className={cn(
-        "relative flex min-h-[430px] flex-col justify-between rounded-2xl border p-5 transition",
+        "relative flex min-h-[390px] flex-col justify-between rounded-xl border p-4 transition",
         active
-          ? "border-[#2DD4BF]/25 bg-[#2DD4BF]/4.5"
+          ? "border-(--color-accent)/25 bg-(--color-accent)/4.5"
           : "border-white/6 bg-[#050607]"
       )}
     >
@@ -322,43 +339,46 @@ function ParticipantCard({
         <span className="text-xs text-[#859599]">{state}</span>
 
         {active ? (
-          <span className="flex items-center gap-1.5 text-xs text-[#A7F3D0]">
+          <span className="flex items-center gap-1.5 text-xs text-[#a7e4f3]">
             <Radio size={13} />
             Active
           </span>
         ) : (
-          <span className="text-xs text-[#69756F]">Idle</span>
+          <span className="flex items-center gap-1.5 text-xs text-[#69756F]">
+            <Circle size={13} />
+            Idle
+          </span>
         )}
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <div
           className={cn(
-            "relative flex size-24 items-center justify-center rounded-2xl border",
+            "relative flex size-20 items-center justify-center rounded-2xl border",
             active
-              ? "border-[#2DD4BF]/25 bg-[#2DD4BF]/10 text-[#A7F3D0]"
+              ? "border-(--color-accent)/25 bg-(--color-accent)/10 text-[#A7F3D0]"
               : "border-white/8 bg-white/2.5 text-[#A8B3AD]"
           )}
         >
           {icon}
 
           {active && (
-            <span className="absolute inset-0 rounded-2xl border border-[#2DD4BF]/30 animate-ping" />
+            <span className="absolute inset-0 rounded-2xl border border-(--color-accent)/30 animate-ping" />
           )}
         </div>
 
-        <h3 className="mt-5 text-lg font-semibold">{label}</h3>
-        <p className="mt-2 max-w-sm text-sm leading-6 text-[#859599]">
+        <h3 className="mt-5 text-base font-semibold">{label}</h3>
+        <p className="mt-2 max-w-xs text-sm leading-6 text-[#859599]">
           {description}
         </p>
 
         {active && (
-          <div className="mt-6 flex h-8 items-end gap-1">
-            {[24, 40, 28, 52, 36, 64, 32, 48, 26].map((height, index) => (
+          <div className="mt-10 flex h-8 items-end gap-1">
+            {[14, 30, 18, 42, 26, 54, 22, 38, 16].map((height, index) => (
               <span
                 key={index}
                 style={{ height }}
-                className="w-1 rounded-full bg-[#2DD4BF]/70"
+                className="w-1 rounded-full bg-(--color-accent)/70"
               />
             ))}
           </div>
@@ -373,6 +393,36 @@ function ParticipantCard({
 
         <Volume2 size={14} className="text-[#69756F]" />
       </div>
+    </div>
+  );
+}
+
+function TranscriptBox({
+  latestMessage,
+  messageCount,
+}: {
+  latestMessage?: string;
+  messageCount: number;
+}) {
+  return latestMessage ? (
+    <div className="rounded-xl border border-white/6 bg-[#050607] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-xs text-[#859599]">Latest transcript</span>
+        <span className="text-xs text-[#69756F]">
+          {messageCount} messages
+        </span>
+      </div>
+
+      <p
+        key={latestMessage}
+        className="animate-fadeIn text-sm leading-6 text-[#A8B3AD]"
+      >
+        {latestMessage}
+      </p>
+    </div>
+  ) : (
+    <div className="rounded-xl border border-dashed border-white/8 bg-white/1.5 p-4 text-sm leading-6 text-[#859599]">
+      Transcript will appear here once the conversation starts.
     </div>
   );
 }
@@ -405,7 +455,7 @@ function ChecklistItem({ done, label }: { done: boolean; label: string }) {
       <span
         className={cn(
           "size-2 rounded-full",
-          done ? "bg-[#2DD4BF]" : "bg-[#3A4240]"
+          done ? "bg-(--color-accent)" : "bg-[#3A4240]"
         )}
       />
     </div>

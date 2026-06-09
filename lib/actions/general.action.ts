@@ -1,10 +1,13 @@
 "use server";
 
-import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
+import Groq from "groq-sdk";
 
 import { db } from "@/firebase/admin";
 import { feedbackSchema } from "@/constants";
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 export async function createFeedback(params: CreateFeedbackParams) {
   const { interviewId, userId, transcript, feedbackId } = params;
@@ -17,28 +20,89 @@ export async function createFeedback(params: CreateFeedbackParams) {
       )
       .join("");
 
-    const { object } = await generateObject({
-      model: google("gemini-2.0-flash-001"),
-      schema: feedbackSchema,
-      prompt: `
-        You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
-        Transcript:
-        ${formattedTranscript}
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.3,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: `
+            You are a professional interviewer analyzing a mock interview.
 
-        Please score the candidate from 0 to 100 in the following areas. Do not add categories other than the ones provided:
-        - **Communication Skills**: Clarity, articulation, structured responses.
-        - **Technical Knowledge**: Understanding of key concepts for the role.
-        - **Problem-Solving**: Ability to analyze problems and propose solutions.
-        - **Cultural & Role Fit**: Alignment with company values and job role.
-        - **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
-        `,
-      system:
-        "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
+            Return ONLY valid JSON.
+            No markdown.
+            No explanation.
+            No code fences.
+
+            The JSON must match this exact shape:
+            {
+              "totalScore": 0,
+              "categoryScores": [
+                {
+                  "name": "Communication Skills",
+                  "score": 0,
+                  "comment": ""
+                },
+                {
+                  "name": "Technical Knowledge",
+                  "score": 0,
+                  "comment": ""
+                },
+                {
+                  "name": "Problem-Solving",
+                  "score": 0,
+                  "comment": ""
+                },
+                {
+                  "name": "Cultural & Role Fit",
+                  "score": 0,
+                  "comment": ""
+                },
+                {
+                  "name": "Confidence & Clarity",
+                  "score": 0,
+                  "comment": ""
+                }
+              ],
+              "strengths": [],
+              "areasForImprovement": [],
+              "finalAssessment": ""
+            }
+          `,
+        },
+        {
+          role: "user",
+          content: `
+            Evaluate the candidate based on this transcript.
+
+            Be honest and specific. Do not be overly lenient.
+
+            Transcript:
+            ${formattedTranscript}
+
+            Scoring rules:
+            - totalScore must be from 0 to 100.
+            - each category score must be from 0 to 100.
+            - strengths must be an array of strings.
+            - areasForImprovement must be an array of strings.
+            - finalAssessment must be a concise paragraph.
+          `,
+        },
+      ],
     });
 
+    const raw = completion.choices[0]?.message?.content;
+
+    if (!raw) {
+      throw new Error("Groq returned an empty feedback response.");
+    }
+
+    const object = JSON.parse(raw);
+
     const feedback = {
-      interviewId: interviewId,
-      userId: userId,
+      interviewId,
+      userId,
       totalScore: object.totalScore,
       categoryScores: object.categoryScores,
       strengths: object.strengths,
@@ -47,13 +111,9 @@ export async function createFeedback(params: CreateFeedbackParams) {
       createdAt: new Date().toISOString(),
     };
 
-    let feedbackRef;
-
-    if (feedbackId) {
-      feedbackRef = db.collection("feedback").doc(feedbackId);
-    } else {
-      feedbackRef = db.collection("feedback").doc();
-    }
+    const feedbackRef = feedbackId
+      ? db.collection("feedback").doc(feedbackId)
+      : db.collection("feedback").doc();
 
     await feedbackRef.set(feedback);
 

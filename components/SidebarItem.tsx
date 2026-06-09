@@ -43,7 +43,7 @@ export default function SidebarItem({ label, href, icon }: SidebarItemProps) {
         "flex h-8 items-center gap-3 rounded-sm px-3 text-sm transition",
         isActive
           ? "bg-white/6 text-[#F4F1EA] shadow-[inset_2px_0_0_0_#2DD4BF]"
-          : "text-[#A8B3AD] hover:bg-white/4.5 hover:text-[#F4F1EA]"
+          : "text-[#b6bcbe] hover:bg-white/4.5 hover:text-[#F4F1EA]"
       )}
     >
       <Icon size={15} />

@@ -34,7 +34,7 @@ const InterviewCard = async ({
   return (
     <Link
       href={href}
-      className="group block rounded-2xl border border-white/6 bg-(--color-surface-1) transition hover:border-white/10 hover:bg-(--color-surface-2)"
+      className="group block rounded-md border border-white/6 bg-(--color-surface-1) transition hover:border-white/10 hover:bg-(--color-surface-2)"
     >
       <article className="flex items-center justify-between gap-4 p-4">
         <div className="flex min-w-0 flex-1 items-start gap-3">
