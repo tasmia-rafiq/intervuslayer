@@ -41,6 +41,7 @@ export async function POST(request: Request) {
     const techstack = body.techstack;
     const amount = body.amount;
     const userid = body.userid || body.userId || body.user_id;
+    const jobDescriptionSummary = body.jobDescriptionSummary;
 
     if (!type || !role || !level || !techstack || !amount || !userid) {
       return Response.json(
@@ -108,6 +109,11 @@ export async function POST(request: Request) {
             Experience Level: ${level}
             Tech stack: ${techstackArray.join(", ")}
             Question type focus: ${type}
+            ${
+              jobDescriptionSummary
+                ? `This interview is based on this job description summary: ${jobDescriptionSummary}.`
+                : ""
+            }
 
             Return ONLY this format:
             ["Question 1", "Question 2", "Question 3"]
@@ -128,6 +134,7 @@ export async function POST(request: Request) {
       userId: userid,
       finalized: true,
       coverImage: getRandomInterviewCover(),
+      jobDescriptionSummary: jobDescriptionSummary || null,
       createdAt: new Date().toISOString(),
     };
 

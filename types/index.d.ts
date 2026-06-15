@@ -7,6 +7,11 @@ interface Feedback {
     score: number;
     comment: string;
   }>;
+  skillScores?: Array<{
+    name: string;
+    score: number;
+    reason: string;
+  }>;
   strengths: string[];
   areasForImprovement: string[];
   finalAssessment: string;
@@ -23,6 +28,8 @@ interface Interview {
   userId: string;
   type: string;
   finalized: boolean;
+  roadmapId?: string;
+  moduleId?: string;
 }
 
 interface CreateFeedbackParams {
@@ -46,6 +53,9 @@ interface InterviewCardProps {
   techstack: string[];
   level: string;
   createdAt?: string;
+  roadmapId?: string;
+  moduleId?: string;
+  feedback?: Feedback | null;
 }
 
 interface AgentProps {
@@ -62,7 +72,7 @@ interface RouteParams {
   searchParams: Promise<Record<string, string>>;
 }
 
-interface GetFeedbackByInterviewIdParams {
+interface UserAndInterviewIdParams {
   interviewId: string;
   userId: string;
 }
@@ -97,4 +107,35 @@ interface InterviewFormProps {
 
 interface TechIconProps {
   techStack: string[];
+}
+
+interface RoadmapModule {
+  id: string;
+  title: string;
+  description: string;
+  targetSkills: string[];
+  interviewCount: number;
+  completedCount: number;
+  status: "locked" | "available" | "completed";
+}
+
+interface Roadmap {
+  id: string;
+  userId: string;
+  role: string;
+  level: string;
+  techstack: string[];
+  title: string;
+  description: string;
+  modules: RoadmapModule[];
+  progress: number;
+  createdAt: string;
+}
+
+interface CreateRoadmapParams {
+  userId: string;
+  role: string;
+  level: string;
+  techstack: string[];
+  jobDescriptionSummary?: string;
 }

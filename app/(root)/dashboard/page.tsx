@@ -5,6 +5,7 @@ import {
   getFeedbackByInterviewId,
   getInterviewsByUserId,
   getLatestInterviews,
+  getSkillGraphByUserId,
 } from "@/lib/actions/general.action";
 import {
   ArrowUpRight,
@@ -24,10 +25,10 @@ type InterviewWithFeedback = InterviewCardProps & {
 
 const DashboardPage = async () => {
   const user = await getCurrentUser();
+  const skillGraph = await getSkillGraphByUserId(user?.id!);
 
-  const [userInterviews, latestInterviews] = await Promise.all([
+  const [userInterviews] = await Promise.all([
     getInterviewsByUserId(user?.id!),
-    getLatestInterviews({ userId: user?.id! }),
   ]);
 
   const userInterviewFeedbacks = await Promise.all(
@@ -40,15 +41,15 @@ const DashboardPage = async () => {
               userId: interview.userId,
             })
           : null,
-    }))
+    })),
   );
 
   const pendingInterviews = userInterviewFeedbacks.filter(
-    (interview) => !interview.feedback
+    (interview) => !interview.feedback,
   );
 
   const completedInterviews = userInterviewFeedbacks.filter(
-    (interview) => !!interview.feedback
+    (interview) => !!interview.feedback,
   );
 
   const reportsReviewed = completedInterviews.length;
@@ -58,12 +59,12 @@ const DashboardPage = async () => {
       ? Math.round(
           completedInterviews.reduce(
             (sum, interview) => sum + (interview.feedback?.totalScore ?? 0),
-            0
-          ) / completedInterviews.length
+            0,
+          ) / completedInterviews.length,
         )
       : null;
 
-  const nextInterview = pendingInterviews[0] ?? latestInterviews?.[0] ?? null;
+  const nextInterview = pendingInterviews[0] ?? null;
   const latestReport = completedInterviews[0] ?? null;
 
   return (
@@ -81,7 +82,7 @@ const DashboardPage = async () => {
             asChild
             className="h-9 rounded-lg bg-[#F4F1EA] px-3 text-sm font-medium text-[#050607] hover:bg-white"
           >
-            <Link href="/interview">
+            <Link href="/interview/new">
               <Plus size={16} />
               New interview
             </Link>
@@ -90,26 +91,36 @@ const DashboardPage = async () => {
       </header>
 
       <main className="py-6">
-        <section className="grid gap-3 md:grid-cols-4">
-          <MetricCard
-            label="Pending"
-            value={pendingInterviews.length}
-            caption="Generated, not taken"
-            icon={<Clock3 size={16} />}
+        <section className="grid gap-4 xl:grid-cols-[1fr_360px]">
+          <DashboardHero
+            userName={user?.name}
+            nextInterview={nextInterview}
+            pendingCount={pendingInterviews.length}
           />
 
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <MetricCard
+              label="Pending"
+              value={pendingInterviews.length}
+              caption="Generated, not taken"
+              icon={<Clock3 size={16} />}
+            />
+
+            <MetricCard
+              label="Average score"
+              value={averageScore ? `${averageScore}/100` : "--"}
+              caption="From completed reports"
+              icon={<BarChart3 size={16} />}
+            />
+          </div>
+        </section>
+
+        <section className="mt-4 grid gap-3 md:grid-cols-2">
           <MetricCard
             label="Completed"
             value={completedInterviews.length}
             caption="Finished with feedback"
             icon={<CheckCircle2 size={16} />}
-          />
-
-          <MetricCard
-            label="Average score"
-            value={averageScore ? `${averageScore}/100` : "--"}
-            caption="From completed reports"
-            icon={<BarChart3 size={16} />}
           />
 
           <MetricCard
@@ -180,7 +191,7 @@ const DashboardPage = async () => {
 
             <Panel eyebrow="Reports" title="Completed interviews">
               {completedInterviews.length > 0 ? (
-                <div className="overflow-hidden rounded-xl border border-white/6">
+                <div className="overflow-hidden rounded-md border border-white/6">
                   <div className="grid grid-cols-[1fr_120px_120px_120px] border-b border-white/6 bg-white/2.5 px-4 py-3 text-xs text-[#69756F] max-md:hidden">
                     <span>Interview</span>
                     <span>Type</span>
@@ -198,8 +209,16 @@ const DashboardPage = async () => {
                 <EmptyState
                   title="No reports yet"
                   description="Complete an interview to generate a report with your score, strengths, and improvement areas."
-                  href={pendingInterviews[0]?.id ? `/interview/${pendingInterviews[0].id}` : "/interview"}
-                  action={pendingInterviews.length > 0 ? "Start pending interview" : "Generate interview"}
+                  href={
+                    pendingInterviews[0]?.id
+                      ? `/interview/${pendingInterviews[0].id}`
+                      : "/interview"
+                  }
+                  action={
+                    pendingInterviews.length > 0
+                      ? "Start pending interview"
+                      : "Generate interview"
+                  }
                 />
               )}
             </Panel>
@@ -208,8 +227,14 @@ const DashboardPage = async () => {
           <aside className="space-y-6">
             <Panel eyebrow="Overview" title="Practice status">
               <div className="space-y-4">
-                <PulseRow label="Pending interviews" value={pendingInterviews.length} />
-                <PulseRow label="Completed sessions" value={completedInterviews.length} />
+                <PulseRow
+                  label="Pending interviews"
+                  value={pendingInterviews.length}
+                />
+                <PulseRow
+                  label="Completed sessions"
+                  value={completedInterviews.length}
+                />
                 <PulseRow label="Reports generated" value={reportsReviewed} />
                 <PulseRow
                   label="Average score"
@@ -222,7 +247,7 @@ const DashboardPage = async () => {
               {latestReport ? (
                 <LatestReportCard interview={latestReport} />
               ) : (
-                <div className="rounded-xl border border-white/6 bg-white/2 p-4 text-sm leading-6 text-[#A8B3AD]">
+                <div className="rounded-md border border-white/6 bg-white/2 p-4 text-sm leading-6 text-[#A8B3AD]">
                   No feedback report yet. Take one pending interview to unlock
                   your first performance report.
                 </div>
@@ -237,6 +262,44 @@ const DashboardPage = async () => {
                 <FrameworkItem label="4" text="Close with confidence." />
               </div>
             </Panel>
+
+            <Panel eyebrow="Skill graph" title="Weakest skill">
+              {skillGraph.weakestSkill ? (
+                <div className="rounded-xl border border-white/6 bg-white/[0.018] p-4">
+                  <p className="text-sm font-medium text-[#F4F1EA]">
+                    {skillGraph.weakestSkill.name}
+                  </p>
+
+                  <div className="mt-4 h-1.5 rounded-full bg-white/6">
+                    <div
+                      className="h-full rounded-full bg-(--color-accent)"
+                      style={{
+                        width: `${Math.min(skillGraph.weakestSkill.averageScore, 100)}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between text-xs">
+                    <span className="text-[#69756F]">Average score</span>
+                    <span className="text-[#F4F1EA]">
+                      {skillGraph.weakestSkill.averageScore}/100
+                    </span>
+                  </div>
+
+                  <Link
+                    href="/progress"
+                    className="mt-4 inline-flex items-center gap-1 text-sm text-[#A7F3D0]"
+                  >
+                    View skill graph
+                    <ArrowUpRight size={14} />
+                  </Link>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-white/6 bg-white/[0.018] p-4 text-sm leading-6 text-[#A8B3AD]">
+                  Complete interviews to build your skill graph.
+                </div>
+              )}
+            </Panel>
           </aside>
         </section>
       </main>
@@ -246,13 +309,9 @@ const DashboardPage = async () => {
 
 export default DashboardPage;
 
-function NextActionCard({
-  interview,
-}: {
-  interview: InterviewCardProps;
-}) {
+function NextActionCard({ interview }: { interview: InterviewCardProps }) {
   return (
-    <div className="rounded-2xl border border-white/6 bg-(--color-surface-1) p-5">
+    <div className="rounded-md border border-white/6 bg-(--color-surface-1) p-5">
       <div className="flex items-start justify-between gap-5">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-sm text-[#859599]">
@@ -266,11 +325,14 @@ function NextActionCard({
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#A8B3AD]">
             This interview has been generated and is waiting for you. Start it
-            when you are ready, then review the feedback report after completion.
+            when you are ready, then review the feedback report after
+            completion.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <Badge>{/mix/gi.test(interview.type) ? "Mixed" : interview.type}</Badge>
+            <Badge>
+              {/mix/gi.test(interview.type) ? "Mixed" : interview.type}
+            </Badge>
             <Badge>{interview.level || "Practice"}</Badge>
             <Badge>{interview.techstack?.slice(0, 3).join(" · ")}</Badge>
           </div>
@@ -290,13 +352,9 @@ function NextActionCard({
   );
 }
 
-function LatestReportCard({
-  interview,
-}: {
-  interview: InterviewWithFeedback;
-}) {
+function LatestReportCard({ interview }: { interview: InterviewWithFeedback }) {
   return (
-    <div className="rounded-xl border border-white/6 bg-white/2 p-4">
+    <div className="rounded-md border border-white/6 bg-white/2 p-4">
       <p className="text-sm text-[#69756F]">Latest completed interview</p>
 
       <h3 className="mt-3 font-medium capitalize">
@@ -325,6 +383,99 @@ function LatestReportCard({
   );
 }
 
+function DashboardHero({
+  userName,
+  nextInterview,
+  pendingCount,
+}: {
+  userName?: string | null;
+  nextInterview: InterviewCardProps | null;
+  pendingCount: number;
+}) {
+  const hasInterview = !!nextInterview;
+
+  return (
+    <section className="relative overflow-hidden rounded-md border border-white/6 bg-(--color-surface-1)">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(255,255,255,0.04),transparent_22%)]" />
+
+      <div className="relative p-5 md:p-6">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div className="inline-flex items-center gap-2 text-[#a7e1f3]">
+            <Target size={18} />
+            {hasInterview ? "Recommended next" : "Start here"}
+          </div>
+
+          <span className="rounded-md border border-white/6 bg-white/2.5 px-2.5 py-1 text-xs text-[#97a6aa]">
+            {pendingCount} pending
+          </span>
+        </div>
+
+        <h2 className="max-w-2xl text-3xl font-semibold tracking-[-0.05em] md:text-4xl">
+          {hasInterview
+            ? `Continue your ${nextInterview.role} interview.`
+            : `Welcome${userName ? `, ${userName}` : ""}.`}
+        </h2>
+
+        <p className="mt-4 max-w-2xl text-lg leading-6 text-[#a8b2b3]">
+          {hasInterview
+            ? "This interview is already generated and waiting in your queue. Take it now, then review your feedback report after completion."
+            : "Generate a role-specific interview, take it under realistic pacing, and use the report to improve your answers."}
+        </p>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Button
+            asChild
+            className="h-10 rounded-lg bg-(--color-accent) px-4 text-sm font-medium text-[#030d11] hover:bg-[#5EEAD4]"
+          >
+            <Link
+              href={
+                hasInterview
+                  ? `/interview/${nextInterview.id}`
+                  : "/interview/new"
+              }
+            >
+              {hasInterview ? (
+                <>
+                  <Mic size={15} />
+                  Start interview
+                </>
+              ) : (
+                <>
+                  <Plus size={15} />
+                  Create interview
+                </>
+              )}
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            className="h-10 rounded-lg border border-white/6 bg-white/2.5 px-4 text-sm font-medium text-[#F4F1EA] hover:bg-white/6"
+          >
+            <Link href="/interview">
+              View library
+              <ArrowUpRight size={14} />
+            </Link>
+          </Button>
+        </div>
+
+        {hasInterview && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Badge>
+              {/mix/gi.test(nextInterview.type) ? "Mixed" : nextInterview.type}
+            </Badge>
+            <Badge>{nextInterview.level || "Practice"}</Badge>
+            <Badge>
+              {nextInterview.techstack?.slice(0, 3).join(" · ") ||
+                "Custom stack"}
+            </Badge>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function MetricCard({
   label,
   value,
@@ -337,17 +488,26 @@ function MetricCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-white/6 bg-(--color-surface-1) p-4">
-      <div className="flex items-center justify-between text-[#69756F]">
-        <span className="text-sm">{label}</span>
-        {icon}
-      </div>
+    <div className="group relative overflow-hidden rounded-md border border-white/6 bg-(--color-surface-1) p-4 transition hover:border-white/10 hover:bg-white/[0.018]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.035),transparent_30%)] opacity-0 transition group-hover:opacity-100" />
 
-      <div className="mt-5 text-2xl font-semibold tracking-[-0.03em]">
-        {value}
-      </div>
+      <div className="relative flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm text-[#859599]">{label}</p>
 
-      <p className="mt-1 text-xs text-[#69756F]">{caption}</p>
+          <div className="mt-5 flex items-end gap-1">
+            <span className="text-3xl font-semibold tracking-[-0.055em] text-[#F4F1EA]">
+              {value}
+            </span>
+          </div>
+
+          <p className="mt-1 text-xs text-[#869294]">{caption}</p>
+        </div>
+
+        <span className="flex size-9 items-center justify-center rounded-md border border-white/6 bg-white/2.5 text-[#859599] transition group-hover:text-[#A7F3D0]">
+          {icon}
+        </span>
+      </div>
     </div>
   );
 }
@@ -368,9 +528,7 @@ function Panel({
       <div className="flex items-center justify-between gap-4 border-b border-white/6 py-3">
         <div>
           <p className="text-base text-[#a2aeb1]">{eyebrow}</p>
-          <h2 className="mt-0.5 text-lg font-medium text-[#F4F1EA]">
-            {title}
-          </h2>
+          <h2 className="mt-0.5 text-lg font-medium text-[#F4F1EA]">{title}</h2>
         </div>
         {action}
       </div>
@@ -380,13 +538,7 @@ function Panel({
   );
 }
 
-function PulseRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
+function PulseRow({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex items-center justify-between border-b border-white/6 pb-3 last:border-b-0 last:pb-0">
       <span className="text-sm text-[#A8B3AD]">{label}</span>
@@ -418,7 +570,7 @@ function EmptyState({
   action: string;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-white/8 bg-white/1.5 p-6">
+    <div className="rounded-md border border-dashed border-white/8 bg-white/1.5 p-6">
       <h3 className="text-sm font-medium">{title}</h3>
       <p className="mt-2 max-w-md text-sm leading-6 text-[#A8B3AD]">
         {description}
@@ -426,7 +578,7 @@ function EmptyState({
 
       <Link
         href={href}
-        className="mt-4 inline-flex text-sm font-medium text-[#A7F3D0] transition hover:text-[#2DD4BF]"
+        className="mt-4 inline-flex text-sm font-medium text-[#a7e1f3] transition hover:text-[#2DD4BF]"
       >
         {action}
       </Link>
@@ -442,11 +594,7 @@ function Badge({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ReportRow({
-  interview,
-}: {
-  interview: InterviewWithFeedback;
-}) {
+function ReportRow({ interview }: { interview: InterviewWithFeedback }) {
   const normalizedType = /mix/gi.test(interview.type)
     ? "Mixed"
     : interview.type;

@@ -3,12 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
-  Premium dark theme tokens (emerald/teal accent, graphite surfaces, ivory text)
-  - Keep font as-is (do not import new fonts)
-
-  */
-
 :root {
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -25,7 +19,7 @@
   --color-surface-2: #141617; /* graphite */
   --color-border: rgba(255, 255, 255, 0.04);
 
-  --color-accent: #2DD4BF; /* emerald/teal primary */
+  --color-accent: #2dd4bf; /* emerald/teal primary */
   --color-accent-600: #21b8a4;
   --color-mint: #dffbf5; /* soft mint */
 
@@ -44,7 +38,7 @@
   --color-surface-1: #0f1113;
   --color-surface-2: #141617;
   --color-border: rgba(255, 255, 255, 0.04);
-  --color-accent: #2DD4BF;
+  --color-accent: #2dd4bf;
   --color-accent-600: #21b8a4;
   --color-mint: #dffbf5;
   --color-ivory: #f6f5ef;
@@ -54,6 +48,27 @@
 @layer base {
   * {
     box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(168, 179, 173, 0.35) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(168, 179, 173, 0.22);
+    border: 3px solid #050607;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(168, 179, 173, 0.38);
   }
   html,
   body,
@@ -64,7 +79,6 @@
   }
   body {
     background-color: var(--color-bg);
-    /* premium radial lighting + subtle grid texture */
     background-image:
       radial-gradient(
         circle at 20% 10%,

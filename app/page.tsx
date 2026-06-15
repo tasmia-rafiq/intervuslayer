@@ -7,6 +7,7 @@ import Timeline from "@/components/ui/landing/Timeline";
 import FeedbackReport from "@/components/ui/landing/FeedbackReport";
 import FinalCta from "@/components/ui/landing/FinalCta";
 import Footer from "@/components/ui/landing/Footer";
+import Pricing from "@/components/ui/landing/Pricing";
 
 export default function LandingPage() {
   return (
@@ -21,6 +22,7 @@ export default function LandingPage() {
         <FeaturesGrid />
         <Timeline />
         <FeedbackReport />
+        <Pricing />
         <FinalCta />
         <Footer />
       </div>

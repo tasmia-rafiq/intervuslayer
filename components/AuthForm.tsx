@@ -113,7 +113,7 @@ export default function AuthForm({ type }: { type: FormType }) {
           transition={{ duration: 0.5 }}
           className="hidden lg:block"
         >
-          <div className="mb-6 w-fit rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs text-[#A7F3D0]">
+          <div className="mb-3 text-[#a7e1f3]">
             {isSignIn ? "Welcome back" : "Start your interview practice system"}
           </div>
 
@@ -123,7 +123,7 @@ export default function AuthForm({ type }: { type: FormType }) {
               : "Build sharper answers before the real interview."}
           </h1>
 
-          <p className="mt-6 max-w-lg text-base leading-7 text-[#A8B3AD]">
+          <p className="mt-6 max-w-lg text-base leading-7 text-[#a8b2b3]">
             Practice live, review your score, and turn vague interview prep into
             a measurable improvement loop.
           </p>
@@ -132,23 +132,23 @@ export default function AuthForm({ type }: { type: FormType }) {
             {benefits.map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/2.5 px-4 py-3"
+                className="flex items-center gap-3 rounded-md border border-white/[0.07] bg-(--color-bg)/80 px-4 py-3"
               >
-                <span className="size-2 rounded-full bg-[#2DD4BF]" />
-                <span className="text-sm text-[#A8B3AD]">{item}</span>
+                <span className="size-2 rounded-full bg-(--color-accent)" />
+                <span className="text-sm text-[#a8b2b3]">{item}</span>
               </div>
             ))}
           </div>
 
-          <div className="mt-10 rounded-3xl border border-white/8 bg-[#0B0F0D]/80 p-5">
-            <p className="text-sm text-[#69756F]">Report preview</p>
+          <div className="mt-10 rounded-md border border-white/8 bg-(--color-bg)/80 p-5">
+            <p className="text-sm text-[#8e979b]">Report preview</p>
             <div className="mt-4 flex items-center gap-4">
-              <div className="flex size-16 items-center justify-center rounded-full bg-[#2DD4BF]/10 text-2xl font-semibold">
+              <div className="flex size-16 items-center justify-center rounded-full bg-(--color-accent)/10 text-2xl font-semibold">
                 78
               </div>
               <div>
-                <p className="font-semibold">Good clarity</p>
-                <p className="mt-1 text-sm text-[#A8B3AD]">
+                <p className="font-semibold text-[#F4F1EA]">Good clarity</p>
+                <p className="mt-1 text-sm text-[#a8b2b3]">
                   Improve technical depth with concrete examples.
                 </p>
               </div>
@@ -160,14 +160,14 @@ export default function AuthForm({ type }: { type: FormType }) {
           initial={{ opacity: 0, y: 22, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          className="rounded-[26px] border border-white/8 bg-[#0B0F0D]/90 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.5)] backdrop-blur"
+          className="rounded-[26px] border border-white/8 bg-(--color-bg)/90 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.5)] backdrop-blur"
         >
-          <div className="rounded-[20px] border border-white/6 bg-[#080a0a] p-6 sm:p-8">
+          <div className="rounded-[20px] border border-white/6 bg-[#050607]/60 p-6 sm:p-8">
             <div className="mb-8 flex items-center gap-3">
-              <Image src="/logo.svg" alt="IntervU Slayer" width={34} height={30} />
+              <Image src="/logo.png" alt="IntervU Slayer" width={34} height={30} />
               <div>
                 <p className="text-sm font-semibold">IntervU Slayer</p>
-                <p className="text-xs text-[#69756F]">
+                <p className="text-xs text-[#8e979b]">
                   {isSignIn ? "Sign in to continue" : "Create your account"}
                 </p>
               </div>
@@ -177,7 +177,7 @@ export default function AuthForm({ type }: { type: FormType }) {
               <h2 className="text-3xl font-semibold tracking-[-0.04em]">
                 {isSignIn ? "Sign in" : "Create account"}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-[#A8B3AD]">
+              <p className="mt-2 text-sm leading-6 text-[#b2bcbd]">
                 {isSignIn
                   ? "Access your interviews, reports, and practice history."
                   : "Start practicing with role-specific interviews and structured feedback."}
@@ -214,7 +214,7 @@ export default function AuthForm({ type }: { type: FormType }) {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="h-12 w-full rounded-xl bg-[#2DD4BF] text-sm font-semibold text-[#03110F] transition hover:-translate-y-0.5 hover:bg-[#5EEAD4] disabled:opacity-60"
+                  className="h-12 w-full rounded-xl bg-(--color-accent) text-sm font-semibold text-[#030e11] transition hover:-translate-y-0.5 hover:bg-[#5ed5ea] disabled:opacity-60"
                 >
                   {isSubmitting
                     ? "Please wait..."
@@ -225,11 +225,11 @@ export default function AuthForm({ type }: { type: FormType }) {
               </form>
             </Form>
 
-            <p className="mt-7 text-center text-sm text-[#A8B3AD]">
+            <p className="mt-7 text-center text-sm text-[#a8b2b3]">
               {isSignIn ? "Don't have an account?" : "Already have an account?"}
               <Link
                 href={isSignIn ? "/sign-up" : "/sign-in"}
-                className="ml-1 font-semibold text-[#A7F3D0] transition hover:text-[#2DD4BF]"
+                className="ml-1 font-semibold text-[#a7e1f3] transition hover:text-(--color-accent)"
               >
                 {isSignIn ? "Create one" : "Sign in"}
               </Link>

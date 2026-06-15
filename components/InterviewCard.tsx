@@ -8,38 +8,32 @@ import {
   FileText,
 } from "lucide-react";
 
-import DisplayTechIcons from "@/components/DisplayTechIcons";
-import { getFeedbackByInterviewId } from "@/lib/actions/general.action";
+import InterviewActions from "@/components/InterviewActions";
 
-const InterviewCard = async ({
+const InterviewCard = ({
   id,
   userId,
   role,
   type,
   techstack,
   createdAt,
+  feedback,
 }: InterviewCardProps) => {
-  const feedback =
-    userId && id
-      ? await getFeedbackByInterviewId({ interviewId: id, userId })
-      : null;
-
   const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
+  const isCompleted = !!feedback;
+
   const formattedDate = dayjs(
-    feedback?.createdAt || createdAt || Date.now(),
+    feedback?.createdAt || createdAt || Date.now()
   ).format("MMM D");
 
-  const href = feedback ? `/interview/${id}/feedback` : `/interview/${id}`;
+  const href = isCompleted ? `/interview/${id}/feedback` : `/interview/${id}`;
 
   return (
-    <Link
-      href={href}
-      className="group block rounded-md border border-white/6 bg-(--color-surface-1) transition hover:border-white/10 hover:bg-(--color-surface-2)"
-    >
-      <article className="flex items-center justify-between gap-4 p-4">
-        <div className="flex min-w-0 flex-1 items-start gap-3">
+    <article className="group rounded-md border border-white/6 bg-(--color-surface-1) transition hover:border-white/10 hover:bg-(--color-surface-2)">
+      <div className="flex items-center justify-between gap-4 p-4">
+        <Link href={href} className="flex min-w-0 flex-1 items-start gap-3">
           <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/2.5">
-            {feedback ? (
+            {isCompleted ? (
               <CheckCircle2 size={15} className="text-[#2DD4BF]" />
             ) : (
               <Circle size={15} className="text-[#69756F]" />
@@ -54,6 +48,16 @@ const InterviewCard = async ({
 
               <span className="rounded-md border border-white/6 bg-white/2.5 px-2 py-0.5 text-[11px] capitalize text-[#859599]">
                 {normalizedType}
+              </span>
+
+              <span
+                className={`rounded-md border px-2 py-0.5 text-[11px] ${
+                  isCompleted
+                    ? "border-(--color-accent)/20 bg-(--color-accent)/10 text-[#A7F3D0]"
+                    : "border-white/6 bg-white/2.5 text-[#859599]"
+                }`}
+              >
+                {isCompleted ? "Completed" : "Pending"}
               </span>
             </div>
 
@@ -70,24 +74,31 @@ const InterviewCard = async ({
 
               <span className="flex items-center gap-1.5">
                 <FileText size={13} />
-                {feedback ? `${feedback.totalScore}/100` : "Not taken"}
+                {isCompleted ? `${feedback?.totalScore}/100` : "Not taken"}
               </span>
 
-              <p className="text-xs text-(--color-accent)">
-                {techstack
-                  .join(" • ")
-                  .replace(/\s*•\s*/g, " • ")}
+              <p className="line-clamp-1 text-xs text-(--color-accent)">
+                {techstack?.join(" • ")}
               </p>
             </div>
           </div>
-        </div>
+        </Link>
 
-        <span className="flex h-8 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-medium text-(--color-accent) opacity-80 transition group-hover:bg-(--color-accent)/10 group-hover:opacity-100">
-          {feedback ? "Open" : "Start"}
-          <ArrowRight size={14} />
-        </span>
-      </article>
-    </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          {id && userId && (
+            <InterviewActions interviewId={id} userId={userId} />
+          )}
+
+          <Link
+            href={href}
+            className="flex h-8 items-center gap-1 rounded-lg px-2 text-xs font-medium text-(--color-accent) opacity-80 transition group-hover:bg-(--color-accent)/10 group-hover:opacity-100"
+          >
+            {isCompleted ? "Open report" : "Start"}
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+      </div>
+    </article>
   );
 };
 

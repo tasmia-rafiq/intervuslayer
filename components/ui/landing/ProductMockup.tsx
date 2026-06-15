@@ -32,10 +32,10 @@ export default function ProductMockup() {
         transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
         className="mx-auto max-w-6xl"
       >
-        <div className="relative rounded-[26px] border border-white/10 bg-[#0B0F0D]/90 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.55)] backdrop-blur">
+        <div className="relative rounded-[26px] border border-white/10 bg-[#050607]/90 p-2 shadow-[0_40px_120px_rgba(0,0,0,0.55)] backdrop-blur">
           <div className="absolute -inset-px rounded-[26px] bg-linear-to-b from-white/10 via-transparent to-transparent opacity-60" />
 
-          <div className="relative overflow-hidden rounded-[20px] border border-white/6 bg-[#070A09]">
+          <div className="relative overflow-hidden rounded-[20px] border border-white/6 bg-(--color-bg)">
             <div className="flex items-center justify-between border-b border-white/6 px-5 py-3">
               <div className="flex gap-2">
                 <span className="size-2.5 rounded-full bg-white/20" />
@@ -43,19 +43,19 @@ export default function ProductMockup() {
                 <span className="size-2.5 rounded-full bg-white/10" />
               </div>
 
-              <div className="hidden rounded-full border border-white/6 bg-white/3 px-4 py-1 text-xs text-[#69756F] md:block">
+              <div className="hidden rounded-full border border-white/6 bg-white/3 px-4 py-1 text-xs text-[#838f92] md:block">
                 intervuslayer.app/session/frontend
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-[#A7F3D0]">
-                <span className="size-2 rounded-full bg-[#2DD4BF]" />
+              <div className="flex items-center gap-2 text-xs text-[#a7e4f3]">
+                <span className="size-2 rounded-full bg-(--color-accent)" />
                 Live
               </div>
             </div>
 
             <div className="grid min-h-[520px] grid-cols-1 lg:grid-cols-[230px_1fr_280px]">
               <aside className="hidden border-r border-white/6 bg-white/1.5 p-5 lg:block">
-                <p className="mb-5 text-xs uppercase tracking-[0.18em] text-[#69756F]">
+                <p className="mb-5 text-xs uppercase tracking-[0.18em] text-[#808a8d]">
                   Practice room
                 </p>
 
@@ -65,8 +65,8 @@ export default function ProductMockup() {
                       key={item}
                       className={`mb-2 rounded-xl px-3 py-2 text-sm ${
                         index === 0
-                          ? "bg-[#2DD4BF]/10 text-[#A7F3D0]"
-                          : "text-[#69756F]"
+                          ? "bg-(--color-accent)/10 text-[#a7e4f3]"
+                          : "text-[#808a8d]"
                       }`}
                     >
                       {item}
@@ -74,30 +74,30 @@ export default function ProductMockup() {
                   ),
                 )}
 
-                <div className="mt-10 rounded-2xl border border-white/6 bg-[#0D1310] p-4">
-                  <p className="text-xs text-[#69756F]">Readiness</p>
+                <div className="mt-10 rounded-md border border-white/6 bg-black/20 p-4">
+                  <p className="text-xs text-[#808a8d]">Readiness</p>
                   <div className="mt-3 text-3xl font-semibold">78%</div>
-                  <p className="mt-1 text-xs text-[#A7F3D0]">+12 this week</p>
+                  <p className="mt-1 text-xs text-[#a7e4f3]">+12 this week</p>
                 </div>
               </aside>
 
               <main className="relative p-5 md:p-7">
                 <div className="mb-6 flex items-start justify-between gap-6">
                   <div>
-                    <p className="text-sm text-[#69756F]">Frontend Engineer</p>
+                    <p className="text-sm text-[#808a8d]">Frontend Engineer</p>
                     <h3 className="mt-1 text-xl font-semibold tracking-[-0.03em]">
                       Explain the JavaScript event loop.
                     </h3>
                   </div>
 
-                  <div className="rounded-full border border-[#2DD4BF]/20 bg-[#2DD4BF]/10 px-3 py-1 text-xs text-[#A7F3D0]">
+                  <div className="rounded-full border border-(--color-accent)/20 bg-(--color-accent)/10 px-3 py-1 text-xs text-[#a7e4f3]">
                     In progress
                   </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-[#2DD4BF]/20 bg-[#0D1512] p-5 shadow-[0_0_50px_rgba(45,212,191,0.06)]">
-                    <div className="mx-auto flex size-20 items-center justify-center rounded-2xl border border-white/10 bg-white/4 text-lg font-semibold">
+                  <div className="rounded-md border border-white/20 bg-(--color-surface-1) p-5 shadow-[0_0_50px_rgb(45, 212, 191, 0.06)]">
+                    <div className="mx-auto flex size-20 items-center justify-center rounded-md border border-white/10 bg-white/4 text-lg font-semibold">
                       AI
                     </div>
                     <p className="mt-4 text-center font-semibold">
@@ -120,31 +120,31 @@ export default function ProductMockup() {
                             repeat: Infinity,
                             delay: index * 0.05,
                           }}
-                          className="w-1 rounded-full bg-[#2DD4BF]/70"
+                          className="w-1 rounded-full bg-(--color-accent)/70"
                         />
                       ))}
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-white/[0.07] bg-white/2.5 p-5">
-                    <div className="mx-auto flex size-20 items-center justify-center rounded-full border border-white/10 bg-[#111714] text-lg font-semibold">
-                      TR
+                  <div className="rounded-md border border-white/[0.07] bg-white/2.5 p-5">
+                    <div className="mx-auto flex size-20 items-center justify-center rounded-full border border-white/10 bg-(--color-surface-2) text-lg font-semibold">
+                      JD
                     </div>
                     <p className="mt-4 text-center font-semibold">You</p>
-                    <p className="mt-6 rounded-xl border border-white/6 bg-black/20 p-3 text-sm leading-6 text-[#A8B3AD]">
+                    <p className="mt-6 rounded-md border border-white/6 bg-black/20 p-3 text-sm leading-6 text-[#a8b0b3]">
                       “The event loop handles async callbacks through phases,
                       but promises run through the microtask queue first...”
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-white/6 bg-black/20 p-4">
+                <div className="mt-4 rounded-md border border-white/6 bg-black/20 p-4">
                   <div className="mb-3 flex items-center justify-between">
-                    <p className="text-sm text-[#69756F]">Live transcript</p>
-                    <p className="text-xs text-[#69756F]">00:32</p>
+                    <p className="text-sm text-[#808a8d]">Live transcript</p>
+                    <p className="text-xs text-[#808a8d]">00:32</p>
                   </div>
 
-                  <div className="space-y-2 text-sm leading-6 text-[#A8B3AD]">
+                  <div className="space-y-2 text-sm leading-6 text-[#a8b0b3]">
                     <p>
                       Interviewer: Can you explain the event loop in Node.js?
                     </p>
@@ -156,18 +156,18 @@ export default function ProductMockup() {
                 </div>
               </main>
 
-              <aside className="border-t border-white/6 bg-white/1.5 p-5 lg:border-l lg:border-t-0">
-                <p className="text-xs uppercase tracking-[0.18em] text-[#69756F]">
+              <aside className="border-t border-white/6 bg-(--color-bg) p-5 lg:border-l lg:border-t-0">
+                <p className="text-xs uppercase tracking-[0.18em] text-[#808a8d]">
                   Report preview
                 </p>
 
-                <div className="mt-5 rounded-2xl border border-white/6 bg-[#0D1310] p-5">
+                <div className="mt-5 rounded-md border border-white/6 bg-(--color-surface-1) p-5">
                   <div className="flex items-center gap-4">
-                    <div className="flex size-16 items-center justify-center rounded-full bg-[#2DD4BF]/10 text-2xl font-semibold text-[#F4F1EA]">
+                    <div className="flex size-16 items-center justify-center rounded-full bg-(--color-accent)/10 text-2xl font-semibold text-[#F4F1EA]">
                       78
                     </div>
                     <div>
-                      <p className="text-xs text-[#69756F]">Overall</p>
+                      <p className="text-xs text-[#808a8d]">Overall</p>
                       <h4 className="font-semibold">Good clarity</h4>
                     </div>
                   </div>
@@ -180,13 +180,13 @@ export default function ProductMockup() {
                     ["Confidence", "69%"],
                   ].map(([label, value]) => (
                     <div key={label}>
-                      <div className="mb-1 flex justify-between text-xs text-[#A8B3AD]">
+                      <div className="mb-1 flex justify-between text-xs text-[#a8b0b3]">
                         <span>{label}</span>
                         <span>{value}</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-white/6">
                         <div
-                          className="h-full rounded-full bg-[#2DD4BF]"
+                          className="h-full rounded-full bg-(--color-accent)"
                           style={{ width: value }}
                         />
                       </div>
@@ -194,7 +194,7 @@ export default function ProductMockup() {
                   ))}
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-white/6 bg-black/20 p-4 text-sm leading-6 text-[#A8B3AD]">
+                <div className="mt-5 rounded-md border border-white/6 bg-black/20 p-4 text-sm leading-6 text-[#a8b0b3]">
                   Improve by using one concrete callback example before moving
                   into promises and microtasks.
                 </div>

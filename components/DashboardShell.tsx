@@ -1,18 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  History,
-  MoreHorizontal,
-  Plus,
-} from "lucide-react";
+import { History, MoreHorizontal, Plus } from "lucide-react";
 import UserMenu from "@/components/UserMenu";
 import SidebarItem from "./SidebarItem";
 
 const workspaceItems = [
   { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
+  { label: "Roadmaps", href: "/roadmaps", icon: "roadmap" },
   { label: "Interviews", href: "/interview", icon: "interviews" },
-  { label: "Reports", href: "/dashboard#reports", icon: "reports" },
-  { label: "Progress", href: "/dashboard#progress", icon: "progress" },
+  { label: "Reports", href: "/reports", icon: "reports" },
+  { label: "Progress", href: "/progress", icon: "progress" },
+];
+
+const createItems = [
+  { label: "New roadmap", href: "/interview/new", icon: "roadmap" },
+  {
+    label: "New interview",
+    href: "/interview/new?mode=single_interview",
+    icon: "interviews",
+  },
 ];
 
 const manageItems = [
@@ -44,7 +50,7 @@ export default function DashboardShell({
             href="/dashboard"
             className="flex min-w-0 items-center gap-2 px-2 py-1.5"
           >
-            <Image src="/logo.svg" alt="Logo" width={28} height={24} />
+            <Image src="/logo.png" alt="Logo" width={28} height={24} />
             <span className="truncate text-sm font-semibold">
               IntervU Slayer
             </span>
@@ -52,7 +58,7 @@ export default function DashboardShell({
 
           <Link
             href="/interview/new"
-            title="Create new interview"
+            title="Create"
             className="flex size-8 items-center justify-center rounded-sm text-[#b0b7bb] transition hover:bg-white/5.5 hover:text-[#F4F1EA]"
           >
             <Plus size={16} />
@@ -66,7 +72,13 @@ export default function DashboardShell({
             ))}
           </SidebarSection>
 
-          <SidebarSection title="History">
+          <SidebarSection title="Create">
+            {createItems.map((item) => (
+              <SidebarItem key={item.label} {...item} />
+            ))}
+          </SidebarSection>
+
+          <SidebarSection title="Recent Activity">
             {visibleRecent.length > 0 ? (
               <>
                 {visibleRecent.map((interview) => (
@@ -78,7 +90,7 @@ export default function DashboardShell({
 
                 {hasMoreRecent && (
                   <Link
-                    href="/dashboard#history"
+                    href="/interview"
                     className="mt-1 flex h-8 items-center gap-3 rounded-sm px-3 text-sm text-[#b6bcbe] transition hover:bg-white/4.5 hover:text-[#F4F1EA]"
                   >
                     <MoreHorizontal size={15} />
@@ -107,7 +119,9 @@ export default function DashboardShell({
 
       <section className="min-h-screen bg-[#050607] lg:pl-[260px]">
         <div className="py-3 pr-3 ">
-          <div className="min-h-screen bg-(--color-bg) border border-white/6 rounded-2xl px-5 py-4">{children}</div>
+          <div className="min-h-screen bg-(--color-bg) border border-white/6 rounded-2xl px-5 py-4">
+            {children}
+          </div>
         </div>
       </section>
     </main>
@@ -132,11 +146,7 @@ function SidebarSection({
   );
 }
 
-function RecentInterviewItem({
-  interview,
-}: {
-  interview: InterviewCardProps;
-}) {
+function RecentInterviewItem({ interview }: { interview: InterviewCardProps }) {
   return (
     <Link
       href={`/interview/${interview.id}`}
@@ -144,9 +154,7 @@ function RecentInterviewItem({
     >
       <History size={14} className="shrink-0" />
 
-      <span className="truncate capitalize">
-        {interview.role} Interview
-      </span>
+      <span className="truncate capitalize">{interview.role} Interview</span>
     </Link>
   );
 }

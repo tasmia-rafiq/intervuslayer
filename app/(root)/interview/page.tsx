@@ -8,14 +8,11 @@ import {
 import {
   ArrowRight,
   ArrowUpRight,
-  CheckCircle2,
-  Clock3,
   FileText,
   Layers3,
   LibraryIcon,
   Mic,
   Plus,
-  Sparkles,
   Target,
 } from "lucide-react";
 import Link from "next/link";
@@ -38,15 +35,15 @@ const InterviewsPage = async () => {
               userId: interview.userId,
             })
           : null,
-    }))
+    })),
   );
 
   const pendingInterviews = interviewsWithFeedback.filter(
-    (interview) => !interview.feedback
+    (interview) => !interview.feedback,
   );
 
   const completedInterviews = interviewsWithFeedback.filter(
-    (interview) => !!interview.feedback
+    (interview) => !!interview.feedback,
   );
 
   const nextInterview = pendingInterviews[0];
@@ -57,8 +54,8 @@ const InterviewsPage = async () => {
       ? Math.round(
           completedInterviews.reduce(
             (sum, interview) => sum + (interview.feedback?.totalScore ?? 0),
-            0
-          ) / completedInterviews.length
+            0,
+          ) / completedInterviews.length,
         )
       : null;
 
@@ -182,8 +179,8 @@ const InterviewsPage = async () => {
             )}
 
             <SectionHeader
-              eyebrow="Queue"
-              title="Pending interviews"
+              eyebrow="Library"
+              title="All interviews"
               action={
                 <Link
                   href="/interview/new"
@@ -194,52 +191,22 @@ const InterviewsPage = async () => {
               }
             />
 
-            {pendingInterviews.length > 0 ? (
+            {interviewsWithFeedback.length > 0 ? (
               <div className="space-y-3">
-                {pendingInterviews.map((interview) => (
-                  <InterviewCard {...interview} key={interview.id} />
+                {interviewsWithFeedback.map((interview) => (
+                  <InterviewCard
+                    {...interview}
+                    key={interview.id}
+                    feedback={interview.feedback}
+                  />
                 ))}
               </div>
             ) : (
               <EmptyState
-                title="Your queue is clear"
-                description="Generate a role-specific interview and it will appear here as a pending session."
+                title="No interviews yet"
+                description="Generate a role-specific interview and it will appear here."
                 href="/interview/new"
                 action="Generate interview"
-              />
-            )}
-
-            <SectionHeader eyebrow="Reports" title="Completed interviews" />
-
-            {completedInterviews.length > 0 ? (
-              <div className="overflow-hidden rounded-xl border border-white/6">
-                <div className="grid grid-cols-[1fr_120px_120px_120px] border-b border-white/6 bg-white/2.5 px-4 py-3 text-xs text-[#69756F] max-md:hidden">
-                  <span>Interview</span>
-                  <span>Type</span>
-                  <span>Score</span>
-                  <span className="text-right">Action</span>
-                </div>
-
-                <div className="divide-y divide-white/6">
-                  {completedInterviews.map((interview) => (
-                    <ReportRow key={interview.id} interview={interview} />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <EmptyState
-                title="No reports yet"
-                description="After you complete an interview, the score and report will appear here."
-                href={
-                  pendingInterviews[0]?.id
-                    ? `/interview/${pendingInterviews[0].id}`
-                    : "/interview/new"
-                }
-                action={
-                  pendingInterviews.length > 0
-                    ? "Start pending interview"
-                    : "Generate interview"
-                }
               />
             )}
           </div>
@@ -248,7 +215,10 @@ const InterviewsPage = async () => {
             <SidePanel title="Workspace health" icon={<Layers3 size={15} />}>
               <div className="space-y-4">
                 <HealthRow label="Pending" value={pendingInterviews.length} />
-                <HealthRow label="Completed" value={completedInterviews.length} />
+                <HealthRow
+                  label="Completed"
+                  value={completedInterviews.length}
+                />
                 <HealthRow
                   label="Average score"
                   value={averageScore ? `${averageScore}/100` : "--"}
@@ -311,9 +281,7 @@ function HeroStat({
   return (
     <div className="rounded-md border border-white/6 bg-[#050607]/70 p-4">
       <p className="text-sm text-[#9aa7aa]">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-[-0.035em]">
-        {value}
-      </p>
+      <p className="mt-2 text-2xl font-semibold tracking-[-0.035em]">{value}</p>
       <p className="mt-1 text-xs text-[#7a8386]">{caption}</p>
     </div>
   );
@@ -332,9 +300,7 @@ function SectionHeader({
     <div className="flex items-center justify-between gap-4 border-b border-white/6 pt-2 pb-3">
       <div>
         <p className="text-base text-[#859599]">{eyebrow}</p>
-        <h2 className="mt-0.5 text-lg font-medium text-[#F4F1EA]">
-          {title}
-        </h2>
+        <h2 className="mt-0.5 text-lg font-medium text-[#F4F1EA]">{title}</h2>
       </div>
       {action}
     </div>
@@ -416,11 +382,7 @@ function EmptyState({
   );
 }
 
-function ReportRow({
-  interview,
-}: {
-  interview: InterviewWithFeedback;
-}) {
+function ReportRow({ interview }: { interview: InterviewWithFeedback }) {
   const normalizedType = /mix/gi.test(interview.type)
     ? "Mixed"
     : interview.type;

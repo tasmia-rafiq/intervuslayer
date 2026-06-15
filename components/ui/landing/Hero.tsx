@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Mic } from "lucide-react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
@@ -24,9 +25,9 @@ export default function Hero() {
           <motion.div
             variants={fadeUp}
             transition={{ duration: 0.55 }}
-            className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-white/[0.07] bg-white/2.5 px-3 py-1.5 text-xs font-medium text-[#9EEAD8]"
+            className="mx-auto mb-5 inline-flex items-center gap-2 text-[#9ed5ea]"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#2DD4BF]" />
+            <Mic size={18} />
             Voice interviews, scored like a real review loop
           </motion.div>
 
@@ -55,7 +56,7 @@ export default function Hero() {
           >
             <Link
               href="/interview"
-              className="rounded-xl bg-[#2DD4BF] px-5 py-3 text-sm font-semibold text-[#02110F] shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_6px_30px_rgba(45,212,191,0.16)] transition hover:-translate-y-0.5 hover:bg-[#5EEAD4]"
+              className="rounded-xl bg-(--color-accent) px-5 py-3 text-sm font-semibold text-[#020d11] shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_6px_30px_rgba(45,212,191,0.16)] transition hover:-translate-y-0.5 hover:bg-[#5ed5ea]"
             >
               Start a mock interview
             </Link>
@@ -71,7 +72,7 @@ export default function Hero() {
           <motion.div
             variants={fadeUp}
             transition={{ duration: 0.65 }}
-            className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-[#728079]"
+            className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-[#889296]"
           >
             {[
               "Technical",

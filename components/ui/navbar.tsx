@@ -12,10 +12,10 @@ export default function Navbar() {
       transition={{ duration: 0.45 }}
       className="fixed left-0 right-0 top-5 z-50 px-6"
     >
-      <div className="mx-auto max-w-6xl rounded-2xl border border-white/8 bg-[#070A09]/75 px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+      <div className="mx-auto max-w-6xl rounded-2xl border border-white/8 bg-(--color-bg)/75 px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/logo.svg" alt="IntervU Slayer" className="size-8" />
+            <img src="/logo.png" alt="IntervU Slayer" className="size-8" />
             <span className="text-sm font-semibold text-[#F4F1EA]">
               IntervU Slayer
             </span>
@@ -46,7 +46,7 @@ export default function Navbar() {
 
             <Link
               href="/sign-up"
-              className="flex items-center gap-2 rounded-xl border border-[#2DD4BF]/20 bg-[#2DD4BF]/15 px-4 py-2 text-sm font-semibold text-[#A7F3D0] transition hover:bg-[#2DD4BF] hover:text-[#03110F]"
+              className="flex items-center gap-2 rounded-xl border border-(--color-accent)/20 bg-(--color-accent)/15 px-4 py-2 text-sm font-semibold text-[#a7e4f3] transition hover:bg-(--color-accent) hover:text-[#030e11]"
             >
               Get started <ArrowRight size={16} />
             </Link>

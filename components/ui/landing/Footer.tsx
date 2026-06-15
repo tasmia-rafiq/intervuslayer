@@ -23,7 +23,7 @@ export default function Footer() {
         <div className="grid gap-10 md:grid-cols-[1.4fr_0.7fr_0.7fr]">
           <div>
             <Link href="/" className="flex items-center gap-3">
-              <img src="/logo.svg" alt="IntervU Slayer" className="size-8" />
+              <img src="/logo.png" alt="IntervU Slayer" className="size-8" />
               <span className="text-sm font-semibold text-[#F4F1EA]">
                 IntervU Slayer
               </span>

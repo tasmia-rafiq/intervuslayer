@@ -1,4 +1,5 @@
 import Agent from "@/components/Agent";
+import InterviewActions from "@/components/InterviewActions";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { getInterviewById } from "@/lib/actions/general.action";
 import { ArrowLeft, Clock3, FileText, Layers3, Target } from "lucide-react";
@@ -13,6 +14,16 @@ const InterviewSessionPage = async ({ params }: RouteParams) => {
 
   if (!interview) redirect("/interview");
 
+  const isRoadmapInterview = interview.roadmapId && interview.moduleId;
+
+  const backHref = isRoadmapInterview
+    ? `/roadmaps/${interview.roadmapId}/modules/${interview.moduleId}`
+    : "/interview";
+
+  const backLabel = isRoadmapInterview
+    ? "Back to module"
+    : "Back to interviews";
+
   const normalizedType = /mix/gi.test(interview.type)
     ? "Mixed"
     : interview.type;
@@ -23,11 +34,11 @@ const InterviewSessionPage = async ({ params }: RouteParams) => {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <Link
-              href="/interview"
+              href={backHref}
               className="mb-3 inline-flex items-center gap-2 text-sm text-[#859599] transition hover:text-[#F4F1EA]"
             >
               <ArrowLeft size={14} />
-              Back to interviews
+              {backLabel}
             </Link>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -39,6 +50,16 @@ const InterviewSessionPage = async ({ params }: RouteParams) => {
                 {normalizedType}
               </span>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {interview.userId === user?.id && (
+              <InterviewActions
+                interviewId={id}
+                userId={user.id}
+                redirectAfterDelete
+              />
+            )}
           </div>
         </div>
       </header>
