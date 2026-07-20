@@ -68,6 +68,37 @@ After each interview session, users receive reports containing:
 
 ---
 
+## System Architecture & Engineering
+
+IntervU Slayer is engineered to handle real-time voice streaming and automated performance evaluation through a decoupled event flow.
+
+### Data & Audio Architecture
+
+```mermaid
+graph TD
+    A[User Voice Input] -->|WebRTC Streaming| B[Vapi AI Voice Gateway]
+    B -->|Text Stream| C[Groq LLM Engine]
+    C -->|Audio Synthesis| B -->|Voice Output| D[User Speaker]
+
+    E[Interview Ends] -->|Session Webhook| F[Next.js Server Actions]
+    F -->|Transcript Data| G[Groq Grading Pipeline]
+    G -->|JSON Schema Verification| H[Firebase Firestore]
+    H -->|Dynamic UI State| I[User Skill Graph & Roadmaps]
+```
+
+### Architectural Breakdown
+
+#### 1. Low-Latency Voice Integration
+To simulate a real, high-pressure interview, the platform bypasses traditional text-input delays. By pairing **Vapi AI** (handling audio streaming via WebRTC) with **Groq** (handling ultra-fast LLM inference), the application maintains conversational pacing with minimal latency.
+
+#### 2. Automated Grading Pipeline
+When a session concludes, a webhook triggers a secure **Next.js Server Action**. The raw text transcript is fed into an evaluation pipeline that enforces strict JSON formatting, instantly breaking the performance down into structured category metrics (Communication, Technical Depth, etc.).
+
+#### 3. State-Driven Roadmap Persistence
+All historical scores and generated roadmaps are stored in **Firebase Firestore**. The frontend tracks this user state to calculate progressive roadmap milestones, dynamically unlocking new interview modules as the developer's readiness scores improve.
+
+---
+
 ## Tech Stack
 ### Frontend
 - Next.js (App Router)
